@@ -1,0 +1,9 @@
+
+{
+    "country": ["COUNTRY_LENGTH", "country"],
+    "audience_type": ["AUDIENCE_TYPE_LENGTH", "audience_type"],
+    "user_interest": ["USER_INTEREST_LENGTH", "user_interest"],
+    "occupation": ["OCCUPATION_LENGTH", "occupation"],
+    "age": ["age"],
+    "gender": ["gender"]
+}

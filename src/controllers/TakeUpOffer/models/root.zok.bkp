@@ -1,0 +1,131 @@
+/*
+ *Define length of the attributes here. 
+ *Zokrates doesn't support dynamic array so we gotta define the lengths here.
+ */
+const u32 USER_INTEREST_LENGTH = UIL;
+const u32 AUDIENCE_TYPE_LENGTH = ATL;
+// const u32 PSYCHOGRAPHICS_LENGTH = PL;
+// const u32 LANGUAGES_LENGTH = LL;
+const u32 OCCUPATION_LENGTH = OL;
+// const u32 SOCIALPREFERENCES_LENGTH = SL;
+const u32 COUNTRY_LENGTH = CL;
+const u32 PRIVATE_DATA_LENGTH = PDL;
+
+
+/*
+ * This struct stores the data sent from Data Provider
+ */
+struct PrivateData {
+    field country;
+    field audience_type;
+    u8 age;
+    field gender;
+    // u32 approximateTotal;
+    // u32 psychographics;
+    field user_interest;
+    // u32 languages;
+    // field spends;
+    field occupation;
+    // u32[SOCIALPREFERENCES_LENGTH] socialMediaPreferences;
+    // u32[2] annualIncome;
+
+}
+
+/*
+ *This struct stores the template data.
+ */
+struct PublicData {
+    field[COUNTRY_LENGTH] country;
+    field[AUDIENCE_TYPE_LENGTH] audience_type;
+    u8[2] age;
+    field gender;
+    // u32 approximateTotal;
+    // u32[PSYCHOGRAPHICS_LENGTH] psychographics;
+    field[USER_INTEREST_LENGTH] user_interest;
+    // u32[LANGUAGES_LENGTH] languages;
+    // field[2] spends;
+    field[OCCUPATION_LENGTH] occupation;
+    // u32[SOCIALPREFERENCES_LENGTH] socialMediaPreferences;
+    // u32[2] annualIncome;
+}
+
+def areSame<COUNT>(bool[COUNT] result) -> bool{
+    u8 mut totalCount = 0;
+    for u32 i in 0..COUNT{
+        totalCount = (result[i] == true)? totalCount+1 : totalCount+0;
+    }
+    return (totalCount > 0)? true : false;
+}
+
+def compareArrays<COUNT>(u32[COUNT] x, u32[COUNT] y) -> bool {
+    bool[COUNT] mut compareResult = [false; COUNT];
+    for u32 i in 0..COUNT{
+
+        bool isPrivateNull = (x[i] == 0) ? true : false;
+        bool isPublicNull = (y[i] == 0) ? true : false;
+
+        compareResult[i] = if isPrivateNull == false || isPublicNull == false {
+            //This is required because if else works in different way in Zokrates
+            (x[i] == y[i])?true:false
+        } else{
+            false
+        };
+    }
+    assert(areSame::<COUNT>(compareResult));
+    return true;
+}
+
+def compare<COUNT>(field x, field[COUNT] y) -> bool {
+    bool[COUNT] mut compareResult = [false; COUNT];
+    for u32 i in 0..COUNT {
+        compareResult[i] = if(x == y[i] || (x == 0)){
+            true
+        } else {
+            false
+        };
+    }
+
+    assert(areSame::<COUNT>(compareResult));
+    return true;
+}
+
+//Compared ranges like age between 0 to 60 etc.
+def compareRanges(u32[2] x, u32[2] y) -> bool {
+    u32 x1 = x[0];
+    u32 x2 = x[1];
+    u32 y1 = y[0];
+    u32 y2 = y[1];
+
+    assert(((y1 <= x1 && x1 <= y2) && (y1 <= x2 && x2 <= y2)) || ((x1 <= y1 && y1 <= x2) && (y1 <= x2 && y2 <= x2)) || !((x1 < y1 && x2 <= y1) || (x1 <= y1 && y1 < x2) || (x1 > y1 && y1 < x2)));
+
+    return true;
+}
+
+def main(PrivateData[PRIVATE_DATA_LENGTH] x, PublicData y) {
+    for u32 i in 0..PRIVATE_DATA_LENGTH {
+        assert(y.age[0] <= x[i].age && x[i].age <= y.age[1]);
+        assert((y.gender == 0 && x[i].gender == 0) || y.gender == x[i].gender);
+        // assert(y.spends[0] <= x[i].spends && x[i].spends <= y.spends[1]);
+        // assert(x[i].approximateTotal == y.approximateTotal);
+
+        // assert(compareRanges(x[i].annualIncome, y.annualIncome));
+
+
+        // assert(compare::<PSYCHOGRAPHICS_LENGTH>(x[i].psychographics, y.psychographics) == true);
+        // assert(compare::<LANGUAGES_LENGTH>(x[i].languages, y.languages) == true);
+        assert(compare::<OCCUPATION_LENGTH>(x[i].occupation, y.occupation) == true);
+        assert(compare::<COUNTRY_LENGTH>(x[i].country, y.country) == true);
+
+        // log("x is {}", x[i].user_interest);
+        // log("y is {}", y.user_interest);
+        assert(compare::<USER_INTEREST_LENGTH>(x[i].user_interest, y.user_interest) == true);
+        assert(compare::<AUDIENCE_TYPE_LENGTH>(x[i].audience_type, y.audience_type) == true);
+
+
+
+        // assert(compareArrays::<USER_INTEREST_LENGTH>(x[i].userInterest, y.userInterest) == true);
+        // assert(compareArrays::<AUDIENCE_TYPE_LENGTH>(x[i].audienceType, y.audienceType) == true);
+        // assert(compareArrays::<SOCIALPREFERENCES_LENGTH>(x[i].socialMediaPreferences, y.socialMediaPreferences) == true);
+    }
+    return;
+}
